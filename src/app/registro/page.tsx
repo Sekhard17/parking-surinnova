@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { User, Lock, UserPlus, Car, Briefcase } from "lucide-react"
 import Image from 'next/image'
+import axios from 'axios' // Importar axios para hacer peticiones HTTP
 
 export default function RegistroComponent() {
   const [rut, setRut] = useState('')
@@ -49,11 +50,25 @@ export default function RegistroComponent() {
     setNombre(formatNombre(value))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Aquí iría la lógica de registro
-    console.log('Registro de usuario:', { rut: formattedRut, nombre, rol: 'Operador' })
-  }
+    //Lógica para solicitudes a Flask Python
+    const userData = {
+      rut: formattedRut,
+      nombre,
+      password,
+      rol: 'Operador',
+    }
+
+    try {
+      const response = await axios.post('http://localhost:5000/api/register', userData);
+      console.log('Registro exitoso:', response.data);
+      // Aquí puedes manejar la respuesta, como redirigir al usuario
+    } catch (error) {
+      console.error('Error en el registro:', error);
+      // Manejar el error, por ejemplo, mostrar un mensaje al usuario
+    }
+  };
 
   useEffect(() => {
     setFormattedRut(formatRut(rut))
