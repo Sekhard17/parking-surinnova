@@ -51,24 +51,39 @@ export default function RegistroComponent() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    //Lógica para solicitudes a Flask Python
+    e.preventDefault();
+    
     const userData = {
-      rut: formattedRut,
-      nombre,
-      password,
-      rol: 'Operador',
-    }
+        rut: formattedRut,
+        nombre,
+        password,
+        confirmPassword, 
+        rol: 'Operador',
+    };
+
+    console.log('Datos a enviar:', userData); // Agregado para depuración
 
     try {
-      const response = await axios.post('http://localhost:5000/back/register', userData);
-      console.log('Registro exitoso:', response.data);
-      // Aquí puedes manejar la respuesta, como redirigir al usuario
+        const response = await fetch('http://localhost:5000/registro', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Error desconocido');
+        }
+
+        const data = await response.json();
+        console.log('Registro exitoso:', data);
     } catch (error) {
-      console.error('Error en el registro:', error);
-      // Manejar el error, por ejemplo, mostrar un mensaje al usuario
+        console.error('Error en el registro:', error);
     }
-  };
+};
+
 
   useEffect(() => {
     setFormattedRut(formatRut(rut))
