@@ -61,7 +61,7 @@ export default function RegistroComponent() {
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/register', userData);
+      const response = await axios.post('http://localhost:5000/back/register', userData);
       console.log('Registro exitoso:', response.data);
       // Aquí puedes manejar la respuesta, como redirigir al usuario
     } catch (error) {
