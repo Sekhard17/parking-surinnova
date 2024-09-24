@@ -1,13 +1,15 @@
-from flask import Flask, app, flash, redirect, render_template, request, jsonify, url_for
+from flask import Flask, flash, redirect, render_template, request, jsonify, url_for
 import os
 from supabase import create_client, Client
-import supabase
 
-url: str = os.environ.get("https://csbuohbxmfkhpyzhnqil.supabase.co")
-key: str = os.environ.get("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNzYnVvaGJ4bWZraHB5emhucWlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjcxMjMzMTcsImV4cCI6MjA0MjY5OTMxN30.SXW_D28eAvgmUX9fO5-xEJeKKt3tdRi6mZNLqAFNvtE")
+app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key')
+
+url: str = os.environ.get("SUPABASE_URL")
+key: str = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
 
-@app.router('/registro', methods=['GET','POST'])
+@app.route('/registro', methods=['GET', 'POST'])
 def registro():
     if request.method == 'POST':
         rut = request.form.get('rut')
@@ -16,13 +18,19 @@ def registro():
         confirmPassword = request.form.get('confirmPassword')
         rol = request.form.get('rol')
 
-        
-        error= supabase.auth.sign_up({'rut': rut, 'password': password, 'data': {'nombre': nombre, 'rol': rol}})
-        if error:
-            flash('Resgistro con Exito')
-            return redirect(url_for('login'))
-        else:
-            flash('Registro fallido')
+        # Validación de la contraseña
+        if password != confirmPassword:
+            flash('Las contraseñas no coinciden.')
             return redirect(url_for('registro'))
-    return render_template('registro.tsx')
+
+        response = supabase.auth.sign_up({'rut': rut, 'password': password, 'data': {'nombre': nombre, 'rol': rol}})
+        error = response.get('error')
         
+        if error:
+            flash('Registro fallido: ' + error['message'])
+            return redirect(url_for('registro'))
+        else:
+            flash('Registro con éxito')
+            return redirect(url_for('login'))
+            
+    return render_template('registro.html')
